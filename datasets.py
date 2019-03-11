@@ -96,6 +96,11 @@ class CityscapesDataset(Dataset):
             -1: (255, 0, 0)  # licenseplate
         }
 
+        # Ensure that this matches the above mapping!#!@#!@#
+        # For example 4 classes, means we should map to the ids=(0,1,2,3)
+        # This is used to specify how many outputs the network should product...
+        self.num_classes = 4
+
         # =============================================
         # Check that inputs are valid
         # =============================================
@@ -133,12 +138,22 @@ class CityscapesDataset(Dataset):
         return len(self.images)
 
     def mask_to_class(self, mask):
+        '''
+        Given the cityscapes dataset, this maps to a 0..classes numbers.
+        This is because we are using a subset of all masks, so we have this "mapping" function.
+        This mapping function is used to map all the standard ids into the smaller subset.
+        '''
         maskimg = torch.zeros((mask.size()[0], mask.size()[1]), dtype=torch.uint8)
         for k in self.mapping:
             maskimg[mask == k] = self.mapping[k]
         return maskimg
 
     def mask_to_rgb(self, mask):
+        '''
+        Given the Cityscapes mask file, this converts the ids into rgb colors.
+        This is needed as we are interested in a sub-set of labels, thus can't just use the
+        standard color output provided by the dataset.
+        '''
         rgbimg = torch.zeros((3, mask.size()[0], mask.size()[1]), dtype=torch.uint8)
         for k in self.mappingrgb:
             rgbimg[0][mask == k] = self.mappingrgb[k][0]
@@ -147,6 +162,12 @@ class CityscapesDataset(Dataset):
         return rgbimg
 
     def class_to_rgb(self, mask):
+        '''
+        This function maps the classification index ids into the rgb.
+        For example after the argmax from the network, you want to find what class
+        a given pixel belongs too. This does that but just changes the color
+        so that we can compare it directly to the rgb groundtruth label.
+        '''
         mask2class = dict((v, k) for k, v in self.mapping.items())
         rgbimg = torch.zeros((3, mask.size()[0], mask.size()[1]), dtype=torch.uint8)
         for k in mask2class:
