@@ -2,7 +2,7 @@
 result
 unet.pkl
 unet_loss
-
+*.pkl
 
 
 # Byte-compiled / optimized / DLL files

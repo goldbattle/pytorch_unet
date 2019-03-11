@@ -22,7 +22,7 @@ I found that the network prediction gave ok visual results after four epochs.
 Please look into the `train.py` file for details on the possible arguments.
 You will first need to download the cityscapes dataset and extract it.
 One would normally use the loss type of "segment" if you want to do pixel-wise segmentation.
-The "reconstruction" will try to just reconstruct the rgb label as the output (which is not super usefull in most cases).
+The "reconstruction" will try to just reconstruct the rgb label as the output (which is not super useful in most cases, and is not tested).
 
 ```
 python3 script_train.py --datadir <path_to_data> --batch_size 4 --num_gpu 1 --losstype segment

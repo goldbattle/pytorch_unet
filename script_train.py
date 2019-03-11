@@ -34,7 +34,7 @@ if args.losstype == "reconstruction":
     num_classes = 3  # red, blue, green
 elif args.losstype == "segment":
     recon_loss_func = nn.CrossEntropyLoss()
-    num_classes = 4  # background, road, sky, car
+    num_classes = img_data.num_classes  # background, road, sky, car
 else:
     print("please select a valid loss type (reconstruction or segment)...")
     exit()
