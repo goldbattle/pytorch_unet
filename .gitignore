@@ -1,5 +1,6 @@
 # Custom things to ignore
 result
+predict
 unet.pkl
 unet_loss
 *.pkl

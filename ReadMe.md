@@ -19,7 +19,7 @@ I found that the network prediction gave ok visual results after four epochs.
 
 ## Training the Model
 
-Please look into the `train.py` file for details on the possible arguments.
+Please look into the `script_train.py` file for details on the possible arguments.
 You will first need to download the cityscapes dataset and extract it.
 One would normally use the loss type of "segment" if you want to do pixel-wise segmentation.
 The "reconstruction" will try to just reconstruct the rgb label as the output (which is not super useful in most cases, and is not tested).
@@ -27,6 +27,23 @@ The "reconstruction" will try to just reconstruct the rgb label as the output (w
 ```
 python3 script_train.py --datadir <path_to_data> --batch_size 4 --num_gpu 1 --losstype segment
 ```
+
+
+
+## Testing the Model
+
+Please look into the `script_test.py` file for details on the possible arguments.
+You will first need to download the cityscapes dataset and extract it.
+This calculates the pixel reconstruction accuracy by first argmax'ing the resulting network prediction.
+From there that "class id" is compared to the groundtruth image and the number of pixels that match are counted.
+The number of correct pixels are divided by the total number to give the pixel accuracy.
+I found that the valuation dataset gave around 0.947 while the training gave 0.964 accuracy.
+
+```
+python3 script_test.py --datadir <path_to_data> --batch_size 4
+```
+
+
 
 
 

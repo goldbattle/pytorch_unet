@@ -21,7 +21,7 @@ epochs = 100
 
 
 # cityscapes dataset loading
-img_data = CityscapesDataset(args.datadir, split='train', mode='fine')
+img_data = CityscapesDataset(args.datadir, split='train', mode='fine', augment=True)
 img_batch = torch.utils.data.DataLoader(img_data, batch_size=args.batch_size, shuffle=True, num_workers=4)
 print(img_data)
 
@@ -42,7 +42,7 @@ else:
 
 # initiate generator and optimizer
 print("creating unet model...")
-generator = nn.DataParallel(UnetGenerator(3, num_classes, 64), device_ids=[i for i in range(args.num_gpu)]).cuda()
+generator = nn.DataParallel(UnetGenerator(3, img_data.num_classes, 64), device_ids=[i for i in range(args.num_gpu)]).cuda()
 gen_optimizer = torch.optim.Adam(generator.parameters(), lr=lr)
 
 
@@ -50,8 +50,8 @@ gen_optimizer = torch.optim.Adam(generator.parameters(), lr=lr)
 file_model = './unet.pkl'
 if os.path.isfile(file_model):
     generator = torch.load(file_model)
-    print("model restored from file....")
-    print("filename = %s" % file_model)
+    print("    - model restored from file....")
+    print("    - filename = %s" % file_model)
 
 
 # or log file that has the output of our loss

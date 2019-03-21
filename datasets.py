@@ -12,13 +12,14 @@ from collections import namedtuple
 
 class CityscapesDataset(Dataset):
 
-    def __init__(self, root, split='train', mode='fine'):
+    def __init__(self, root, split='train', mode='fine', augment=False):
 
         self.root = os.path.expanduser(root)
         self.mode = 'gtFine' if mode == 'fine' else 'gtCoarse'
         self.images_dir = os.path.join(self.root, 'leftImg8bit', split)
         self.targets_dir = os.path.join(self.root, self.mode, split)
         self.split = split
+        self.augment = augment
         self.images = []
         self.targets = []
         self.mapping = {
@@ -131,6 +132,7 @@ class CityscapesDataset(Dataset):
         fmt_str += '    Number of images: {}\n'.format(self.__len__())
         fmt_str += '    Split: {}\n'.format(self.split)
         fmt_str += '    Mode: {}\n'.format(self.mode)
+        fmt_str += '    Augment: {}\n'.format(self.augment)
         fmt_str += '    Root Location: {}\n'.format(self.root)
         return fmt_str
 
@@ -184,24 +186,29 @@ class CityscapesDataset(Dataset):
         # next load the target
         target = Image.open(self.targets[index]).convert('L')
 
-        # Resize
-        image = TF.resize(image, size=(128+10, 256+10), interpolation=Image.BILINEAR)
-        target = TF.resize(target, size=(128+10, 256+10), interpolation=Image.NEAREST)
-
-        # Random crop
-        i, j, h, w = transforms.RandomCrop.get_params(image, output_size=(128, 256))
-        image = TF.crop(image, i, j, h, w)
-        target = TF.crop(target, i, j, h, w)
-
-        # Random horizontal flipping
-        if random.random() > 0.5:
-            image = TF.hflip(image)
-            target = TF.hflip(target)
-
-        # Random vertical flipping
-        if random.random() > 0.5:
-            image = TF.vflip(image)
-            target = TF.vflip(target)
+        # If augmenting, apply random transforms
+        # Else we should just resize the image down to the correct size
+        if self.augment:
+            # Resize
+            image = TF.resize(image, size=(128+10, 256+10), interpolation=Image.BILINEAR)
+            target = TF.resize(target, size=(128+10, 256+10), interpolation=Image.NEAREST)
+            # Random crop
+            i, j, h, w = transforms.RandomCrop.get_params(image, output_size=(128, 256))
+            image = TF.crop(image, i, j, h, w)
+            target = TF.crop(target, i, j, h, w)
+            # Random horizontal flipping
+            if random.random() > 0.5:
+                image = TF.hflip(image)
+                target = TF.hflip(target)
+            # Random vertical flipping
+            # (I found this caused issues with the sky=road during prediction)
+            # if random.random() > 0.5:
+            #    image = TF.vflip(image)
+            #    target = TF.vflip(target)
+        else:
+            # Resize
+            image = TF.resize(image, size=(128, 256), interpolation=Image.BILINEAR)
+            target = TF.resize(target, size=(128, 256), interpolation=Image.NEAREST)
 
         # convert to pytorch tensors
         # target = TF.to_tensor(target)
